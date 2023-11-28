@@ -1,5 +1,5 @@
 import os.path
-
+import os
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -14,7 +14,8 @@ import math
 import json
 
 client = OpenAI(
-   api_key='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',
+  
+   api_key=os.environ["OPENAI_API_KEY"],
 )
 
 # If modifying these scopes, delete the file token.json.
