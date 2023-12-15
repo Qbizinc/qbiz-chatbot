@@ -17,17 +17,14 @@ import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 import PyPDF2
 
-client = OpenAI(
-  
-   api_key=os.environ["OPENAI_API_KEY"],
-)
-
-# If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive.readonly", "https://www.googleapis.com/auth/drive.metadata.readonly"]
-
 
 def main():
-  """Shows basic usage of the Drive v3 API.
+
+
+  # Google API scopes: If modifying these scopes, delete the file token.json.
+  SCOPES = ["https://www.googleapis.com/auth/drive.readonly", "https://www.googleapis.com/auth/drive.metadata.readonly"]
+
+  """Drive v3 API.
   Prints the names and ids of the first n files the user has access to.
   """
   creds = None
@@ -64,17 +61,6 @@ def main():
   except HttpError as error:
     # TODO(developer) - Handle errors from drive API.
     print(f"An error occurred: {error}")
-
-def create_embeddings(text_blocks):
-
-    embedding_list = []
-    for text_block in text_blocks:
-        embeddings = client.embeddings.create(
-            input= text_block["text_block"],
-            model="text-embedding-ada-002"
-        )
-        embedding_list.append(embeddings)
-    return embedding_list
 
 def create_weaviate_data(text_blocks):
   
@@ -124,10 +110,12 @@ def text_blocks_for_drive_content(service):
     
     results = (
         service.files()
-        .list(q=query_str, pageSize=100, fields="nextPageToken, files(id, name, mimeType)")
+#        .list(q=query_str, pageSize=1000, fields="nextPageToken, files(id, name, mimeType)") #max page size = 1000
+        .list(pageSize=1000, fields="nextPageToken, files(id, name, mimeType)") #max page size = 1000
         .execute()
     )
     items = results.get("files", [])
+    print(len(items), " files found")
 
     if not items:
       print("No files found.")
