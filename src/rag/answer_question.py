@@ -22,14 +22,22 @@ weaviate_response = (
     weaviate_client.query
     .get("Text_block", ["text_block"])
     .with_near_text({"concepts": [query_string]})
-    .with_limit(4)
+    .with_limit(10)
     .do()
 )
 
 additional_context = [w["text_block"] for w in  weaviate_response["data"]["Get"]["Text_block"]]
 joined_texts = '\n\n'.join([a for a in additional_context])
 
-system_prompt = f"""I want you to answer a user query using only the following source texts as references: {joined_texts}"""
+system_prompt = "You are an expert on QBiz internal documentation, " \
+                "Answer the question using the following QBiz internal documentation as source:  {joined_texts}"
+
+#"QBiz is a data consultancy company." \
+#"You are an expert on QBiz internal documentation, which" \
+#"includes information about Qbiz'z clients, client projects, , who worked in the projects, internal projects, Qbiz as an employer and other things." \
+#"Assume that all questions are related to the QBiz internal documentation. " \
+#"Keep your answers based on facts - do not hallucinate features."\
+#"Following source texts include the relevant content of the QBiz internal documentation: {joined_texts}" 
 
 
 completion = openai_client.chat.completions.create(
