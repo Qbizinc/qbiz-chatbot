@@ -5,22 +5,6 @@ import json
 from openai import OpenAI
 
 
-@st.cache_resource(show_spinner=False)
-def load_data(model, system_promt):
-    with st.spinner(text="Loading and indexing QBiz Docs... may take a few minutes"):
-        reader = SimpleDirectoryReader(input_dir=r".\data", recursive=True)
-        docs = reader.load_data()
-        service_context = ServiceContext.from_defaults(llm=OpenAI(model=model,
-                                                                  temperatur=0.7,
-                                                                  system_prompt=system_promt,
-                                                                  api_key=openai_key))
-        index = VectorStoreIndex.from_documents(docs, service_context=service_context)
-
-        st.write("Index Created")
-        return index
-
-
-
 def run_app():
 
     st.title("QBiz Chatbot")
