@@ -7,7 +7,6 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 import io
-import html2text
 from openai import OpenAI
 import re
 import math
@@ -63,7 +62,9 @@ def get_google_drive_api_service():
 def get_drive_metadata_list(service):
 
     query_str = "not ('aino.nyblom@qbizinc.com' in owners)" \
-              + "and (name contains '.pdf' or mimeType='application/vnd.google-apps.document')"
+              + "and not (name contains 'career development' or name contains 'Career Development') " \
+              + "and (name contains '.pdf' or mimeType='application/vnd.google-apps.document'" \
+              + "or mimeType='application/vnd.google-apps.presentation' or mimeType='application/vnd.google-apps.spreadsheet')"
 
     results = (
         service.files()
@@ -92,23 +93,42 @@ def create_text_blocks(service, items):
     
     for item in items:
       print(f"{item['name']} ({item['id']}) ({item['mimeType']})")
-      text_blocks.extend(text_blocks_for_google_docs(item, service))
+      text_blocks.extend(text_blocks_for_google_doc_and_pres(item, service))
       text_blocks.extend(text_blocks_for_pdfs(item, service))                     
 
     return text_blocks
 
 
-# Extract the text content of a google document file, and call a function to create 300 word text blocks.
+# Extract the text content of a google document or presentation file, and call a function to create 300 word text blocks.
 # Reference: https://medium.com/@matheodaly.md/using-google-drive-api-with-python-and-a-service-account-d6ae1f6456c2
-def text_blocks_for_google_docs(item, service):
+def text_blocks_for_google_doc_and_pres(item, service):
   
-  if item['mimeType'] == "application/vnd.google-apps.document":
-    request_file = service.files().export_media(fileId=item['id'], mimeType='text/html').execute()
-    text = html2text.html2text(str(request_file))
+  if item['mimeType'] in ("application/vnd.google-apps.document", "application/vnd.google-apps.presentation"):
+    try:
+      request_file = service.files().export_media(fileId=item['id'], mimeType='text/plain').execute()
+      text = str(request_file)
+    except HttpError as error:
+      print(f"An error occurred: {error}")
+      return []
     return text_blocks_for_a_file(item['name'], text, 300, 10, True)
   else:
     return []
 
+# Extract the text content of a google spreadsheet file, and call a function to create 300 word text blocks.  
+def text_blocks_for_google_spreadsheet(item, service):
+  
+  if item['mimeType'] == "application/vnd.google-apps.spreadsheet":
+    try:
+      request_file = service.files().export_media(fileId=item['id'], mimeType='text/csv').execute()
+      text = str(request_file)
+    except HttpError as error:
+      print(f"An error occurred: {error}")
+      return []
+    return text_blocks_for_a_file(item['name'], text, 300, 10, True)
+  else:
+    return []
+
+  
 # Extract the text content of a pdf file, and call a function to create 300 word text blocks.
 def text_blocks_for_pdfs(item, service):
   if item['name'][-3:] == "pdf":
