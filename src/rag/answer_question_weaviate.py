@@ -19,8 +19,7 @@ def run_app():
 
     weaviate_client = weaviate.Client(
         url = "https://aino-test-cluster-i5jg5b13.weaviate.network",
-        #auth_client_secret=weaviate.AuthApiKey(api_key=os.environ["WEVIATE_API_KEY"]),
-        auth_client_secret=weaviate.AuthApiKey(api_key="UCd1aKEmbi7fZns6sHYY1AQh4FYjETpGDZK3"),
+        auth_client_secret=weaviate.AuthApiKey(api_key=os.environ["WEVIATE_API_KEY"]),
         additional_headers = {
             "X-OpenAI-Api-Key": os.environ["OPENAI_API_KEY"]
         }
