@@ -36,6 +36,7 @@ def main():
 def create_llama_index(docs):
 
     vector_store = DeepLakeVectorStore(
+        token=os.environ["ACTIVELOOP_TOKEN"]
         dataset_path="hub://coursestudent/LlamaIndex_main",
         overwrite=True,
         runtime={"tensor_db": True})
