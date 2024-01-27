@@ -36,7 +36,7 @@ def main():
 def create_llama_index(docs):
 
     vector_store = DeepLakeVectorStore(
-        token=os.environ["ACTIVELOOP_TOKEN"]
+        token=os.environ["ACTIVELOOP_TOKEN"],
         dataset_path="hub://coursestudent/LlamaIndex_main",
         overwrite=True,
         runtime={"tensor_db": True})
@@ -89,7 +89,7 @@ def get_drive_metadata_list_by_filetype(service, filetype):
 
     results = (
         service.files()
-        .list(q=query_str, pageSize=1000, includeItemsFromAllDrives=True, supportsAllDrives=True, fields="nextPageToken, files(id, name, mimeType)") #max page size = 1000
+        .list(q=query_str, pageSize=1, includeItemsFromAllDrives=True, supportsAllDrives=True, fields="nextPageToken, files(id, name, mimeType)") #max page size = 1000
         .execute()
     )
 
